@@ -1,0 +1,17 @@
+language: java
+
+install:
+  - mvn dependency:go-offline -B -V
+
+script:
+  - mvn install -B
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+
+notifications:
+  email:
+    recipients:
+      - sanyakovlev@yandex.ru
+    on_success: never
+    on_failure: always
