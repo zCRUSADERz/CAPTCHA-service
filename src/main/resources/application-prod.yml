@@ -28,3 +28,5 @@ spring:
 server:
   error:
     include-stacktrace: never
+application:
+  mode: PRODUCTION
