@@ -92,4 +92,46 @@ public class Captcha {
         this.answer = answer;
         this.created = LocalDateTime.now(ZoneOffset.UTC);
     }
+
+    /**
+     * Сhecks if the timeout over.
+     * Captcha can be solved in a certain period of time.
+     *
+     * @param timeoutInSeconds timeout in seconds.
+     * @throws ResponseStatusException if timeout is over.
+     * @since 0.1
+     */
+    public void checkTimeout(final int timeoutInSeconds)
+        throws ResponseStatusException {
+        final boolean timeoutOver = LocalDateTime
+            .now(ZoneOffset.UTC)
+            .minusSeconds(timeoutInSeconds)
+            .isAfter(this.created);
+        if (timeoutOver) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                String.format(
+                    "For captcha with id: %s timeout is over.",
+                    this.id
+                )
+            );
+        }
+    }
+
+    /**
+     * Checks if captcha has already solved.
+     *
+     * @throws ResponseStatusException if solved.
+     * @since 0.1
+     */
+    public void checkSolved() throws ResponseStatusException {
+        if (this.isSolved()) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                String.format(
+                    "Captcha with id: %s has already solved.", this.id
+                )
+            );
+        }
+    }
 }
