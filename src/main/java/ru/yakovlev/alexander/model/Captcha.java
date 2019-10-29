@@ -134,4 +134,30 @@ public class Captcha {
             );
         }
     }
+
+    /**
+     * Check answer without state checks and set solved to true,
+     * if check successfully.
+     *
+     * @param requestAnswer answer to captcha.
+     * @return result of a captcha check.
+     * @since 0.1
+     */
+    public CaptchaCheckResult check(final String requestAnswer) {
+        final CaptchaCheckResult result;
+        if (this.answer.equals(requestAnswer)) {
+            result = new CaptchaCheckResult(true, "");
+        } else {
+            if (this.answer.length() != requestAnswer.length()) {
+                final String error = String.format(
+                    "%d characters entered, but should be %d.",
+                    requestAnswer.length(), this.answer.length()
+                );
+                result = new CaptchaCheckResult(false, error);
+            } else {
+                result = new CaptchaCheckResult(false, "Wrong answer");
+            }
+        }
+        return result;
+    }
 }
