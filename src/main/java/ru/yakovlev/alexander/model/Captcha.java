@@ -136,6 +136,30 @@ public class Captcha {
     }
 
     /**
+     * Solve this captcha with check of internal state.
+     * Note: this method mutate this captcha!
+     *
+     * @param requestAnswer    answer to captcha.
+     * @param secretKey        client secret key.
+     * @param timeoutInSeconds captcha timeout in seconds.
+     * @return result of captcha check.
+     * @since 0.1
+     */
+    public CaptchaCheckResult solve(
+        final String requestAnswer, final UUID secretKey,
+        final int timeoutInSeconds
+    ) {
+        this.owner.authenticate(secretKey);
+        this.checkSolved();
+        this.checkTimeout(timeoutInSeconds);
+        final CaptchaCheckResult result = this.check(requestAnswer);
+        if (result.isSuccess()) {
+            this.solved = true;
+        }
+        return result;
+    }
+
+    /**
      * Check answer without state checks and set solved to true,
      * if check successfully.
      *
