@@ -99,4 +99,18 @@ public class CaptchaService {
         captcha.checkTimeout(this.captchaProperties.getTimeout());
         return captcha;
     }
+
+    /**
+     * Creates a new captcha.
+     *
+     * @param clientId client UUID.
+     * @return captcha.
+     * @since 0.1
+     */
+    public Captcha createNew(final UUID clientId) {
+        final Client client = this.clientService.findById(clientId);
+        return this.captchaRepository.save(
+            new Captcha(client, this.randomStringStream.next())
+        );
+    }
 }
