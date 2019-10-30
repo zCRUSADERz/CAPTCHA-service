@@ -41,6 +41,17 @@
     <java.version>11</java.version>
   </properties>
 
+  <repositories>
+    <repository>
+      <id>maven-central</id>
+      <url>https://repo1.maven.org/maven2/</url>
+    </repository>
+    <repository>
+      <id>enonic</id>
+      <url>https://repo.enonic.com/public/</url>
+    </repository>
+  </repositories>
+
   <dependencies>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -103,6 +114,12 @@
       <artifactId>lombok</artifactId>
       <version>1.18.10</version>
       <scope>provided</scope>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/nl.captcha/simplecaptcha -->
+    <dependency>
+      <groupId>nl.captcha</groupId>
+      <artifactId>simplecaptcha</artifactId>
+      <version>1.2.1</version>
     </dependency>
   </dependencies>
 

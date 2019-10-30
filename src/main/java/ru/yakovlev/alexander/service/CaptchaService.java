@@ -28,6 +28,8 @@ import java.awt.image.BufferedImage;
 import java.util.UUID;
 
 import lombok.AllArgsConstructor;
+import nl.captcha.backgrounds.SquigglesBackgroundProducer;
+import nl.captcha.noise.CurvedLineNoiseProducer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -98,6 +100,29 @@ public class CaptchaService {
         captcha.checkSolved();
         captcha.checkTimeout(this.captchaProperties.getTimeout());
         return captcha;
+    }
+
+    /**
+     * Return captcha image.
+     *
+     * @param clientId  client UUID.
+     * @param captchaId captcha id.
+     * @return captcha image.
+     * @since 0.1
+     */
+    public BufferedImage captchaImage(
+        final UUID clientId, final Long captchaId) {
+        final Captcha captcha = this.findActiveCaptcha(
+            clientId, captchaId
+        );
+        return new nl.captcha.Captcha
+            .Builder(200, 50)
+            .addBackground(new SquigglesBackgroundProducer())
+            .addText(captcha::getAnswer)
+            .addNoise(new CurvedLineNoiseProducer())
+            .addBorder()
+            .build()
+            .getImage();
     }
 
     /**
