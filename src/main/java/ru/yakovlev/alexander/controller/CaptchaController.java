@@ -29,10 +29,16 @@ import java.util.UUID;
 
 import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponentsBuilder;
+import ru.yakovlev.alexander.configuration.ServerMode;
+import ru.yakovlev.alexander.model.Captcha;
+import ru.yakovlev.alexander.model.dto.CaptchaResponse;
 import ru.yakovlev.alexander.service.CaptchaService;
 
 /**
@@ -46,6 +52,7 @@ import ru.yakovlev.alexander.service.CaptchaService;
 @AllArgsConstructor
 public class CaptchaController {
     private final CaptchaService captchaService;
+    private final ServerMode serverMode;
 
     /**
      * Return captcha png image.
@@ -61,5 +68,37 @@ public class CaptchaController {
         @PathVariable final Long captchaId
     ) {
         return this.captchaService.captchaImage(clientId, captchaId);
+    }
+
+    /**
+     * Creates a new captcha for the client.
+     *
+     * @param clientId client UUID.
+     * @return captcha id with optional answer.
+     * @since 0.1
+     */
+    @PostMapping
+    public ResponseEntity createCaptcha(@PathVariable UUID clientId) {
+        final Captcha captcha = this.captchaService.createNew(clientId);
+        final Long captchaId = captcha.getId();
+        final Object result;
+        if (this.serverMode.equals(ServerMode.TEST)) {
+            result = new CaptchaResponse(captchaId, captcha.getAnswer());
+        } else if (this.serverMode.equals(ServerMode.PRODUCTION)) {
+            result = captchaId;
+        } else {
+            throw new IllegalStateException(
+                String.format(
+                    "Unknown mode: %s", this.serverMode
+                )
+            );
+        }
+        return ResponseEntity
+            .created(
+                UriComponentsBuilder
+                    .fromUriString("/clients/{clientId}/captcha/{captchaId}")
+                    .build(clientId, captchaId)
+            )
+            .body(result);
     }
 }
