@@ -24,6 +24,7 @@
 
 package ru.yakovlev.alexander.configuration;
 
+import java.awt.image.BufferedImage;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
@@ -31,6 +32,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.http.converter.BufferedImageHttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverter;
 import ru.yakovlev.alexander.service.CharacterRange;
 import ru.yakovlev.alexander.service.RandomStringStream;
 
@@ -42,6 +45,11 @@ import ru.yakovlev.alexander.service.RandomStringStream;
  */
 @Configuration
 public class BeanConfiguration {
+
+    @Bean
+    public HttpMessageConverter<BufferedImage> bufferedImageHttpMessageConverter() {
+        return new BufferedImageHttpMessageConverter();
+    }
 
     @Bean
     public ServerMode serverMode(final AppProperties properties) {
