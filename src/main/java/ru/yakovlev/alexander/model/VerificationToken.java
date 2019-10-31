@@ -35,10 +35,14 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Version;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.util.UUID;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+import ru.yakovlev.alexander.model.dto.CaptchaCheckResult;
 
 /**
  * Captcha verification token.
@@ -82,5 +86,34 @@ public class VerificationToken {
     ) {
         this.answerToCaptcha = answerToCaptcha;
         this.captcha = captcha;
+    }
+
+    /**
+     * Activate token. Verification token can be activated only once.
+     * Note: this method mutate this object and maybe captcha!
+     *
+     * @param secretKey        client secret key.
+     * @param timeoutInSeconds captcha timeout in seconds.
+     * @return result of a captcha check.
+     * @throws ResponseStatusException if token has already activated.
+     * @since 0.1
+     */
+    public CaptchaCheckResult activate(
+        final UUID secretKey, final int timeoutInSeconds
+    ) {
+        if (this.activated) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                String.format(
+                    "Token with id: %s has already activated.",
+                    this.id
+                )
+            );
+        }
+        final CaptchaCheckResult result = this.captcha.solve(
+            this.answerToCaptcha, secretKey, timeoutInSeconds
+        );
+        this.activated = true;
+        return result;
     }
 }
