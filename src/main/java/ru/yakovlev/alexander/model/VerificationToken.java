@@ -116,4 +116,25 @@ public class VerificationToken {
         this.activated = true;
         return result;
     }
+
+    /**
+     * Returns the result of a captcha check if the token was activated.
+     *
+     * @return result of a captcha check.
+     * @throws ResponseStatusException if the token has not been activated.
+     * @since 0.1
+     */
+    public CaptchaCheckResult resultOfCaptchaCheck()
+        throws ResponseStatusException {
+        if (!this.activated) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                String.format(
+                    "Token with id: %s has not yet been activated.",
+                    this.id
+                )
+            );
+        }
+        return this.captcha.check(this.answerToCaptcha);
+    }
 }
