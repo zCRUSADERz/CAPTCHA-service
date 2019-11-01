@@ -33,13 +33,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 import ru.yakovlev.alexander.configuration.ServerMode;
 import ru.yakovlev.alexander.model.Captcha;
+import ru.yakovlev.alexander.model.VerificationToken;
 import ru.yakovlev.alexander.model.dto.CaptchaResponse;
 import ru.yakovlev.alexander.service.CaptchaService;
+import ru.yakovlev.alexander.service.TokenService;
 
 /**
  * Captcha controller.
@@ -52,6 +55,7 @@ import ru.yakovlev.alexander.service.CaptchaService;
 @AllArgsConstructor
 public class CaptchaController {
     private final CaptchaService captchaService;
+    private final TokenService tokenService;
     private final ServerMode serverMode;
 
     /**
@@ -100,5 +104,32 @@ public class CaptchaController {
                     .build(clientId, captchaId)
             )
             .body(result);
+    }
+
+    /**
+     * Solve captcha.
+     *
+     * @param clientId  client id.
+     * @param captchaId captcha id.
+     * @param answer    answer to captcha.
+     * @return verification token id.
+     * @since 0.1
+     */
+    @PostMapping("/{captchaId}/solve")
+    public ResponseEntity<Long> solve(
+        @PathVariable UUID clientId,
+        @PathVariable Long captchaId,
+        @RequestBody String answer
+    ) {
+        final VerificationToken token = this.tokenService
+            .create(clientId, captchaId, answer);
+        return ResponseEntity
+            .created(
+                UriComponentsBuilder
+                    .fromUriString(
+                        "/clients/{clientId}/captcha/{captchaId}/tokens/{tokenId}"
+                    ).build(clientId, captchaId, token.getId())
+            )
+            .body(token.getId());
     }
 }
